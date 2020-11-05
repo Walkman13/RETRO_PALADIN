@@ -2,6 +2,7 @@ from settings import *
 
 
 def draw_window():
+    # Facepalm.
     global ANIM_COUNT
     global PAL_X_POS
     global PAL_Y_POS
@@ -24,6 +25,7 @@ def draw_window():
         pal_anim_run.append(img)
     surf_run = pal_anim_run[ANIM_COUNT // 15]
 
+    # I don't know how use it.
     pal_anim_jump = []
     for i in range(2):
         filename = f'pal_jump_{i}.png'
@@ -53,6 +55,7 @@ def draw_window():
         PAL_X_POS += SPEED
         ANIM_COUNT += 1
 
+    # It needs fixing
     elif keys[pygame.K_SPACE]:
         if JUMP_COUNT >= -10:
             WINDOW.blit(surf_jump, (PAL_X_POS, PAL_Y_POS))
