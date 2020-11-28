@@ -8,7 +8,11 @@ def draw_window():
     global PAL_Y_POS
     global JUMP_COUNT
     global FLIP
+    global GAME_IS_DONE
 
+    pygame.mouse.set_visible(False)
+
+    cursor_surface = pygame.transform.scale(pygame.image.load('assets/img/cursor.png').convert_alpha(), (30, 35))
     bg_surface = pygame.transform.scale(pygame.image.load('assets/img/background.png').convert(), (WIDTH, HEIGHT))
 
     pal_anim_stay = []
@@ -34,6 +38,9 @@ def draw_window():
     surf_jump = pal_anim_jump[ANIM_COUNT // 60]
 
     WINDOW.blit(bg_surface, (0, 0))
+    if pygame.mouse.get_focused():
+        pos = pygame.mouse.get_pos()
+        WINDOW.blit(cursor_surface, (pos[0], pos[1]))
 
     if ANIM_COUNT + 1 >= FPS:
         ANIM_COUNT = 0
@@ -44,12 +51,12 @@ def draw_window():
         surf_jump = pygame.transform.flip(surf_jump, True, False)
 
     keys = pygame.key.get_pressed()
-    if keys[pygame.K_LEFT]:
+    if keys[pygame.K_LEFT] or keys[pygame.K_a]:
         FLIP = False
         WINDOW.blit(surf_run, (PAL_X_POS, PAL_Y_POS))
         PAL_X_POS -= SPEED
         ANIM_COUNT += 1
-    elif keys[pygame.K_RIGHT]:
+    elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:
         FLIP = True
         WINDOW.blit(surf_run, (PAL_X_POS, PAL_Y_POS))
         PAL_X_POS += SPEED
@@ -65,6 +72,10 @@ def draw_window():
             WINDOW.blit(surf_jump, (PAL_X_POS, PAL_Y_POS))
             PAL_Y_POS += 1
             JUMP_COUNT += 1
+
+    elif keys[pygame.K_ESCAPE]:
+        pygame.quit()
+        GAME_IS_DONE = True
 
     else:
         WINDOW.blit(surf_stay, (PAL_X_POS, PAL_Y_POS))
