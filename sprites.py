@@ -43,14 +43,16 @@ class Player(pg.sprite.Sprite):
     def load_images(self):
         pass
 
-    def update(self):
+    def update(self, pal_run):
         self.acc = pg.math.Vector2(0, PLAYER_GRAVITY)
         keys = pg.key.get_pressed()
         if keys[pg.K_LEFT] or keys[pg.K_a]:
-            self.pal_stay = self.images_left
+            # self.pal_stay = self.images_left
+            self.pal_stay = pal_run
             self.acc.x = -PLAYER_ACC
         if keys[pg.K_RIGHT] or keys[pg.K_d]:
-            self.pal_stay = self.images_right
+            # self.pal_stay = self.images_right
+            self.pal_stay = pal_run
             self.acc.x = PLAYER_ACC
         if keys[pg.K_SPACE]:
             self.rect.x += 1
