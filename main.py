@@ -36,6 +36,8 @@ class Game:
             if hits:
                 self.player.pos.y = hits[0].rect.top
                 self.player.vel.y = 0
+        if self.player.vel.x != 0:
+            self.player.pal_stay = pal_run
 
     def events(self):
         for event in pg.event.get():
@@ -43,9 +45,6 @@ class Game:
                 if self.playing:
                     self.playing = False
                 self.running = False
-            if event.type == pg.KEYDOWN:
-                if event.key == pg.K_SPACE:
-                    self.player.jump()
 
     def draw(self):
         self.screen.blit(background, (0, 0))
@@ -56,6 +55,7 @@ class Game:
 game = Game()
 background = pg.transform.scale(pg.image.load('assets/img/background.png').convert(), (WIDTH, HEIGHT))
 pal_stay = load_images(path='assets/img/pal/stay', size=(144, 144))
+pal_run = load_images(path='assets/img/pal/run', size=(144, 144))
 
 while game.running:
     game.new()

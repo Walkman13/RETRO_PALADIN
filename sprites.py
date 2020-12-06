@@ -10,16 +10,29 @@ def load_images(path, size):
         images.append(img)
     return images
 
+#
+# class Sprites:
+#     def __init__(self, filename):
+#         self.sprites = pg.image.load(filename).convert_alpha()
+#
+#     def get_image(self, x, y, width, height):
+#         image = pg.Surface((width, height))
+#         image.blit(self.sprites, (0, 0), (x, y, width, height))
+#         image = pg.transform.scale(image, (144, 144))
+#         return image
+
 
 class Player(pg.sprite.Sprite):
     def __init__(self, game, images):
         pg.sprite.Sprite.__init__(self)
         self.game = game
-        self.images = images
+        self.walking = False
+        self.jumping = False
+        self.pal_stay = images
         self.images_left = images
         self.images_right = [pg.transform.flip(image, True, False) for image in images]
-        self.index = 0
-        self.image = images[self.index]
+        self.current_frame = 0
+        self.image = images[self.current_frame]
         self.rect = self.image.get_rect()
         self.rect.center = (WIDTH / 2, HEIGHT / 2)
         self.pos = pg.math.Vector2(WIDTH / 2, HEIGHT / 2)
@@ -27,22 +40,24 @@ class Player(pg.sprite.Sprite):
         self.acc = pg.math.Vector2(0, 0)
         self.last_update = pg.time.get_ticks()
 
-    def jump(self):
-        self.rect.x += 1
-        hits = pg.sprite.spritecollide(self, self.game.platforms, False)
-        self.rect.x -= 1
-        if hits:
-            self.vel.y = -PLAYER_JUMP
+    def load_images(self):
+        pass
 
     def update(self):
         self.acc = pg.math.Vector2(0, PLAYER_GRAVITY)
         keys = pg.key.get_pressed()
-        if keys[pg.K_LEFT]:
-            self.images = self.images_left
+        if keys[pg.K_LEFT] or keys[pg.K_a]:
+            self.pal_stay = self.images_left
             self.acc.x = -PLAYER_ACC
-        if keys[pg.K_RIGHT]:
-            self.images = self.images_right
+        if keys[pg.K_RIGHT] or keys[pg.K_d]:
+            self.pal_stay = self.images_right
             self.acc.x = PLAYER_ACC
+        if keys[pg.K_SPACE]:
+            self.rect.x += 1
+            hits = pg.sprite.spritecollide(self, self.game.platforms, False)
+            self.rect.x -= 1
+            if hits:
+                self.vel.y = -PLAYER_JUMP
 
         self.acc.x += self.vel.x * PLAYER_FRICTION
         self.vel += self.acc
@@ -52,10 +67,10 @@ class Player(pg.sprite.Sprite):
         now = pg.time.get_ticks()
         if now - self.last_update >= FPS:
             self.last_update = now
-            self.index += 1
-        if self.index >= len(self.images):
-            self.index = 0
-        self.image = self.images[self.index]
+            self.current_frame += 1
+        if self.current_frame >= len(self.pal_stay):
+            self.current_frame = 0
+        self.image = self.pal_stay[self.current_frame]
 
 
 class Platform(pg.sprite.Sprite):
