@@ -29,15 +29,13 @@ class Game:
             self.draw()
 
     def update(self):
-        self.all_sprites.update()
+        self.all_sprites.update(pal_run)
 
         if self.player.vel.y > 0:
             hits = pg.sprite.spritecollide(self.player, self.platforms, False)
             if hits:
                 self.player.pos.y = hits[0].rect.top
                 self.player.vel.y = 0
-        if self.player.vel.x != 0:
-            self.player.pal_stay = pal_run
 
     def events(self):
         for event in pg.event.get():
@@ -45,6 +43,9 @@ class Game:
                 if self.playing:
                     self.playing = False
                 self.running = False
+
+            if self.player.vel.x != 0:
+                self.player.pal_stay = pal_stay
 
     def draw(self):
         self.screen.blit(background, (0, 0))
