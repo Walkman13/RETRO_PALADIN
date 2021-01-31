@@ -1,4 +1,5 @@
 from sprites import *
+from os import path
 
 
 class Game:
@@ -10,11 +11,17 @@ class Game:
         self.clock = pg.time.Clock()
         self.running = True
         self.playing = True
+        self.load_data()
+
+    def load_data(self):
+        self.dir = path.dirname(__file__)
+        img_dir = path.join(self.dir, 'assets/img')
+        self.spritesheet = Spritesheet(path.join(img_dir, SPRITESHEET))
 
     def new(self):
         self.all_sprites = pg.sprite.Group()
         self.platforms = pg.sprite.Group()
-        self.player = Player(self, images=pal_stay)
+        self.player = Player(self)
         self.platf = Platform(0, HEIGHT - 92, WIDTH, 92)
         self.all_sprites.add(self.player)
         self.all_sprites.add(self.platf)
@@ -29,13 +36,20 @@ class Game:
             self.draw()
 
     def update(self):
-        self.all_sprites.update(pal_run)
+        self.all_sprites.update()
 
         if self.player.vel.y > 0:
             hits = pg.sprite.spritecollide(self.player, self.platforms, False)
             if hits:
-                self.player.pos.y = hits[0].rect.top
-                self.player.vel.y = 0
+                lowest = hits[0]
+                for hit in hits:
+                    if hit.rect.bottom > lowest.rect.bottom:
+                        lowest = hit
+                if lowest.rect.right + 10 > self.player.pos.x > lowest.rect.left - 10:
+                    if self.player.pos.y < lowest.rect.centery:
+                        self.player.pos.y = lowest.rect.top
+                        self.player.vel.y = 0
+                        self.player.jumping = False
 
     def events(self):
         for event in pg.event.get():
@@ -44,8 +58,11 @@ class Game:
                     self.playing = False
                 self.running = False
 
-            if self.player.vel.x != 0:
-                self.player.pal_stay = pal_stay
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_SPACE:
+                    self.player.jump()
+            if event.type == pg.KEYUP:
+                self.player.jump_cut()
 
     def draw(self):
         self.screen.blit(background, (0, 0))
@@ -55,8 +72,6 @@ class Game:
 
 game = Game()
 background = pg.transform.scale(pg.image.load('assets/img/background.png').convert(), (WIDTH, HEIGHT))
-pal_stay = load_images(path='assets/img/pal/stay', size=(144, 144))
-pal_run = load_images(path='assets/img/pal/run', size=(144, 144))
 
 while game.running:
     game.new()
