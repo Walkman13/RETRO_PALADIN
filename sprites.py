@@ -1,19 +1,10 @@
 import pygame as pg
-import os
 from settings import *
-
-
-# def load_images(path, size):
-#     images = []
-#     for i in os.listdir(path):
-#         img = pg.transform.scale(pg.image.load(path + os.sep + i).convert_alpha(), size)
-#         images.append(img)
-#     return images
 
 
 class Spritesheet:
     def __init__(self, filename):
-        self.spritesheet = pg.image.load(filename).convert()
+        self.spritesheet = pg.image.load(filename).convert_alpha()
 
     def get_image(self, x, y, width, height):
         image = pg.Surface((width, height))
@@ -29,7 +20,7 @@ class Player(pg.sprite.Sprite):
         self.game = game
         self.walking = False
         self.jumping = False
-        self.flipping = False
+        self.fliping = False
         self.current_frame = 0
         self.last_update = 0
         self.load_images()
@@ -42,12 +33,12 @@ class Player(pg.sprite.Sprite):
 
     def load_images(self):
         self.standing_frames_l = [self.game.spritesheet.get_image(0, 0, 48, 48),
-                                  self.game.spritesheet.get_image(0, 48, 48, 48),
-                                  self.game.spritesheet.get_image(0, 96, 48, 48),
-                                  self.game.spritesheet.get_image(0, 144, 48, 48)]
+                                  self.game.spritesheet.get_image(48, 0, 48, 48),
+                                  self.game.spritesheet.get_image(96, 0, 48, 48),
+                                  self.game.spritesheet.get_image(144, 0, 48, 48)]
         self.standing_frames_r = []
         for frame in self.standing_frames_l:
-            frame.set_colorkey(WHITE)
+            frame.set_colorkey(BLACK)
             self.standing_frames_r.append(pg.transform.flip(frame, True, False))
         self.walk_frames_l = [self.game.spritesheet.get_image(0, 48, 48, 48),
                             self.game.spritesheet.get_image(48, 48, 48, 48),
@@ -55,7 +46,7 @@ class Player(pg.sprite.Sprite):
                             self.game.spritesheet.get_image(144, 48, 48, 48)]
         self.walk_frames_r = []
         for frame in self.walk_frames_l:
-            frame.set_colorkey(WHITE)
+            frame.set_colorkey(BLACK)
             self.walk_frames_r.append(pg.transform.flip(frame, True, False))
 
     def jump_cut(self):
@@ -77,10 +68,10 @@ class Player(pg.sprite.Sprite):
         keys = pg.key.get_pressed()
 
         if keys[pg.K_LEFT] or keys[pg.K_a]:
-            self.flipping = False
+            self.fliping = False
             self.acc.x = -PLAYER_ACC
         if keys[pg.K_RIGHT] or keys[pg.K_d]:
-            self.flipping = True
+            self.fliping = True
             self.acc.x = PLAYER_ACC
 
         self.acc.x += self.vel.x * PLAYER_FRICTION
@@ -119,12 +110,12 @@ class Player(pg.sprite.Sprite):
         if not self.jumping and not self.walking:
             if now - self.last_update > 350:
                 self.last_update = now
-                if not self.flipping:
-                    self.current_frame = (self.current_frame + 1) % len(self.standing_frames_l)
-                else:
-                    self.current_frame = (self.current_frame + 1) % len(self.standing_frames_r)
+                self.current_frame = (self.current_frame + 1) % len(self.standing_frames_l)
                 bottom = self.rect.bottom
-                self.image = self.standing_frames_l[self.current_frame]
+                if not self.fliping:
+                    self.image = self.standing_frames_l[self.current_frame]
+                else:
+                    self.image = self.standing_frames_r[self.current_frame]
                 self.rect = self.image.get_rect()
                 self.rect.bottom = bottom
 
