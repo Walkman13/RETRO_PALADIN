@@ -22,10 +22,10 @@ class Game:
         self.all_sprites = pg.sprite.Group()
         self.platforms = pg.sprite.Group()
         self.player = Player(self)
-        self.platf = Platform(0, HEIGHT - 92, WIDTH, 92)
+        self.ground = Ground(0, HEIGHT - 92, WIDTH, 92)
         self.all_sprites.add(self.player)
-        self.all_sprites.add(self.platf)
-        self.platforms.add(self.platf)
+        self.all_sprites.add(self.ground)
+        self.platforms.add(self.ground)
         self.run()
 
     def run(self):
