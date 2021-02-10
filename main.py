@@ -19,13 +19,15 @@ class Game:
         self.spritesheet = Spritesheet(path.join(img_dir, SPRITESHEET))
 
     def new(self):
-        self.all_sprites = pg.sprite.Group()
+        self.all_sprites = pg.sprite.LayeredUpdates()
         self.platforms = pg.sprite.Group()
+        self.lights = pg.sprite.Group()
         self.player = Player(self)
-        self.ground = Ground(0, HEIGHT - 92, WIDTH, 92)
-        self.all_sprites.add(self.player)
-        self.all_sprites.add(self.ground)
-        self.platforms.add(self.ground)
+        self.ground = Ground(self, 0, HEIGHT - 92, WIDTH, 92)
+        for urn in URN_POSITIONS:
+            Objects(self, *urn)
+        for fire in FIRE_POSITIONS:
+            Fire(self, *fire)
         self.run()
 
     def run(self):
