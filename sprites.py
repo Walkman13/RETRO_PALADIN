@@ -15,12 +15,13 @@ class Spritesheet:
 
 class Player(pg.sprite.Sprite):
     def __init__(self, game):
-        self.group = game.all_sprites
-        pg.sprite.Sprite.__init__(self)
+        self._layer = PLAYER_LAYER
+        self.groups = game.all_sprites
+        pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.walking = False
         self.jumping = False
-        self.fliping = False
+        self.flipping = False
         self.current_frame = 0
         self.last_update = 0
         self.load_images()
@@ -42,9 +43,9 @@ class Player(pg.sprite.Sprite):
             self.standing_frames_r.append(pg.transform.flip(frame, True, False))
 
         self.walk_frames_l = [self.game.spritesheet.get_image(0, 48, 48, 48),
-                            self.game.spritesheet.get_image(48, 48, 48, 48),
-                            self.game.spritesheet.get_image(96, 48, 48, 48),
-                            self.game.spritesheet.get_image(144, 48, 48, 48)]
+                              self.game.spritesheet.get_image(48, 48, 48, 48),
+                              self.game.spritesheet.get_image(96, 48, 48, 48),
+                              self.game.spritesheet.get_image(144, 48, 48, 48)]
         self.walk_frames_r = []
         for frame in self.walk_frames_l:
             frame.set_colorkey(BLACK)
@@ -74,10 +75,10 @@ class Player(pg.sprite.Sprite):
         keys = pg.key.get_pressed()
 
         if keys[pg.K_LEFT] or keys[pg.K_a]:
-            self.fliping = False
+            self.flipping = False
             self.acc.x = -PLAYER_ACC
         if keys[pg.K_RIGHT] or keys[pg.K_d]:
-            self.fliping = True
+            self.flipping = True
             self.acc.x = PLAYER_ACC
 
         self.acc.x += self.vel.x * PLAYER_FRICTION
@@ -113,23 +114,16 @@ class Player(pg.sprite.Sprite):
                 self.rect = self.image.get_rect()
                 self.rect.bottom = bottom
 
-        # OMG!! Refactor this!!
         if self.jumping:
             bottom = self.rect.bottom
-            if not self.fliping:
-                if self.vel.y < 0:
-                    self.current_frame = 0
-                    self.image = self.jump_frames_l[self.current_frame]
-                else:
-                    self.current_frame = 1
-                    self.image = self.jump_frames_l[self.current_frame]
+            if self.vel.y < 0:
+                self.current_frame = 0
             else:
-                if self.vel.y < 0:
-                    self.current_frame = 0
-                    self.image = self.jump_frames_r[self.current_frame]
-                else:
-                    self.current_frame = 1
-                    self.image = self.jump_frames_r[self.current_frame]
+                self.current_frame = 1
+            if not self.flipping:
+                self.image = self.jump_frames_l[self.current_frame]
+            else:
+                self.image = self.jump_frames_r[self.current_frame]
             self.rect = self.image.get_rect()
             self.rect.bottom = bottom
 
@@ -138,7 +132,7 @@ class Player(pg.sprite.Sprite):
                 self.last_update = now
                 self.current_frame = (self.current_frame + 1) % len(self.standing_frames_l)
                 bottom = self.rect.bottom
-                if not self.fliping:
+                if not self.flipping:
                     self.image = self.standing_frames_l[self.current_frame]
                 else:
                     self.image = self.standing_frames_r[self.current_frame]
@@ -147,10 +141,57 @@ class Player(pg.sprite.Sprite):
 
 
 class Ground(pg.sprite.Sprite):
-    def __init__(self, x, y, w, h):
-        pg.sprite.Sprite.__init__(self)
+    def __init__(self, game, x, y, w, h):
+        self.groups = game.all_sprites, game.platforms
+        pg.sprite.Sprite.__init__(self, self.groups)
         self.image = pg.Surface((w, h))
         self.image.fill(BLUE)
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+
+
+class Objects(pg.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self._layer = URN_LAYER
+        self.groups = game.all_sprites, game.platforms
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = self.game.spritesheet.get_image(96, 96, 48, 48)
+        self.image.set_colorkey(BLACK)
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+
+
+class Fire(pg.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self._layer = FIRE_LAYER
+        self.groups = game.all_sprites, game.lights
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.load_images()
+        self.current_frame = 0
+        self.last_update = 0
+        self.image = self.fire_frames[0]
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+
+    def load_images(self):
+        self.fire_frames = [self.game.spritesheet.get_image(0, 144, 48, 48),
+                            self.game.spritesheet.get_image(48, 144, 48, 48),
+                            self.game.spritesheet.get_image(96, 144, 48, 48),
+                            self.game.spritesheet.get_image(144, 144, 48, 48)]
+        for frame in self.fire_frames:
+            frame.set_colorkey(BLACK)
+
+    def update(self):
+        self.animate()
+
+    def animate(self):
+        now = pg.time.get_ticks()
+        if now - self.last_update > 120:
+            self.last_update = now
+            self.current_frame = (self.current_frame + 1) % len(self.fire_frames)
+            self.image = self.fire_frames[self.current_frame]
