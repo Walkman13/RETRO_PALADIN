@@ -58,7 +58,11 @@ class Game:
                         self.player.pos.y = lowest.rect.top
                         self.player.vel.y = 0
                         self.player.jumping = False
-
+        if self.player.pos.x == WIDTH:
+            self.bgX -= 5
+            self.background.blit(self.background, (self.bgX, self.bgY))
+            self.background.blit(self.background, (WIDTH + self.bgX, self.bgY))
+            pg.display.update()
         # self.all_sprites.update()
         # if self.player.vel.y > 0:
         #     hits = pg.sprite.spritecollide(self.player, self.platforms, False)
@@ -81,7 +85,9 @@ class Game:
                 self.player.jump_cut()
 
     def draw(self):
-        self.screen.blit(self.background, (0, 0))
+        self.bgX = 0
+        self.bgY = 0
+        self.screen.blit(self.background, (self.bgX, self.bgY))
         self.all_sprites.draw(self.screen)
         pg.display.flip()
 
