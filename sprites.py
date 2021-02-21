@@ -223,3 +223,4 @@ class Fire(pg.sprite.Sprite):
             self.current_frame = (self.current_frame + 1) % len(self.fire_frames)
             self.image = self.fire_frames[self.current_frame]
             self.image = pg.transform.scale(self.image, (144, 144))
+            
