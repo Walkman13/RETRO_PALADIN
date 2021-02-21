@@ -54,12 +54,18 @@ class Game:
                 for hit in hits:
                     if hit.rect.bottom > lowest.rect.bottom:
                         lowest = hit
-                # Pay attention to it
-                if lowest.rect.right + 100 > self.player.pos.x > lowest.rect.left - 100:
                     if self.player.pos.y < lowest.rect.centery:
                         self.player.pos.y = lowest.rect.top
                         self.player.vel.y = 0
                         self.player.jumping = False
+
+        # self.all_sprites.update()
+        # if self.player.vel.y > 0:
+        #     hits = pg.sprite.spritecollide(self.player, self.platforms, False)
+        #     if hits:
+        #         self.player.pos.y = hits[0].rect.top
+        #         self.player.vel.y = 0
+        #         self.player.jumping = False
 
     def events(self):
         for event in pg.event.get():
