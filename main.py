@@ -6,8 +6,9 @@ class Game:
     def __init__(self):
         pg.init()
         pg.mixer.init()
+        self.flags = pg.FULLSCREEN | pg.DOUBLEBUF
         pg.display.set_caption(TITLE)
-        self.screen = pg.display.set_mode(SIZE)
+        self.screen = pg.display.set_mode(SIZE, vsync=1)
         self.clock = pg.time.Clock()
         self.running = True
         self.playing = True
@@ -16,6 +17,7 @@ class Game:
     def load_data(self):
         self.dir = path.dirname(__file__)
         img_dir = path.join(self.dir, 'assets/img')
+        self.background = pg.transform.scale(pg.image.load('assets/img/background.png').convert(), (WIDTH, HEIGHT))
         self.spritesheet = Spritesheet(path.join(img_dir, SPRITESHEET))
 
     def new(self):
@@ -23,9 +25,14 @@ class Game:
         self.platforms = pg.sprite.Group()
         self.lights = pg.sprite.Group()
         self.player = Player(self)
-        self.ground = Ground(self, 0, HEIGHT - 92, WIDTH, 92)
+        ground_x_pos = 0
+        for i in range(5):
+            Ground(self, ground_x_pos, HEIGHT - 96)
+            ground_x_pos += 288
         for urn in URN_POSITIONS:
-            Objects(self, *urn)
+            Urns(self, *urn)
+        for lamp in LAMP_POSITIONS:
+            Lamps(self, *lamp)
         for fire in FIRE_POSITIONS:
             Fire(self, *fire)
         self.run()
@@ -47,7 +54,8 @@ class Game:
                 for hit in hits:
                     if hit.rect.bottom > lowest.rect.bottom:
                         lowest = hit
-                if lowest.rect.right + 10 > self.player.pos.x > lowest.rect.left - 10:
+                # Pay attention to it
+                if lowest.rect.right + 100 > self.player.pos.x > lowest.rect.left - 100:
                     if self.player.pos.y < lowest.rect.centery:
                         self.player.pos.y = lowest.rect.top
                         self.player.vel.y = 0
@@ -67,13 +75,12 @@ class Game:
                 self.player.jump_cut()
 
     def draw(self):
-        self.screen.blit(background, (0, 0))
+        self.screen.blit(self.background, (0, 0))
         self.all_sprites.draw(self.screen)
         pg.display.flip()
 
 
 game = Game()
-background = pg.transform.scale(pg.image.load('assets/img/background.png').convert(), (WIDTH, HEIGHT))
 
 while game.running:
     game.new()
